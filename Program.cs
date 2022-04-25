@@ -37,13 +37,20 @@ namespace SongDTAInjector
         {
 
             Console.WriteLine("Milo Scene DTA Injector - 2022 ihatecompvir");
-            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("--------------------------------------------");
 
             if (args.Length == 0)
             {
                 DisplayUsage();
                 return;
             }
+
+            if (!File.Exists(args[0]))
+            {
+                Console.WriteLine($"DTA file {args[1]} does not exist!");
+                return;
+            }
+
 
             if (!File.Exists(args[1]))
             {
@@ -54,11 +61,12 @@ namespace SongDTAInjector
 
             Console.WriteLine($"Attempting to inject {args[0]} into {args[1]}...");
 
-            // Find the DEADDEAD pattern indicating the end of the first ObjectDir
+            // find the DEADDEAD pattern indicating the end of the first ObjectDir
+
             byte[] pattern = new byte[4] { 0xAD, 0xDE, 0xAD, 0xDE };
             var dtbTreePos = FindBytePattern(File.ReadAllBytes(args[1]), pattern);
 
-            if (dtbTreePos == 0)
+            if (dtbTreePos == -1)
             {
                 Console.WriteLine("Could not find pattern! Please check that your Milo file is valid.");
                 return;
@@ -81,15 +89,18 @@ namespace SongDTAInjector
                 var dtbBytes = dtbStream.ToArray();
 
                 // fix block sizes
+
                 var magic = miloReader.ReadUInt32();
                 var blockOffset = miloReader.ReadUInt32();
                 var blockCount = miloReader.ReadUInt32();
 
                 if (magic != 3401506479)
                 {
-                    Console.WriteLine("Milo magic value is not correct. This tool will only work on deflated milos!");
+                    Console.WriteLine("Milo magic value is the compressed type. This tool will only work on decompressed milos!");
                     return;
                 }
+
+                // adjust the block sizes so the entire scene is one contiguous block
 
                 miloWriter.Write(magic);
                 miloWriter.Write(blockOffset);
@@ -106,6 +117,7 @@ namespace SongDTAInjector
                 }
 
                 // jump to the first block
+
                 miloWriter.BaseStream.Position = blockOffset;
                 miloReader.BaseStream.Position = blockOffset;
 

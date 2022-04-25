@@ -10,6 +10,9 @@ namespace DtxCS
     /// </summary>
     public static class DTX
     {
+        // dirty hack
+        static int childrenWithIds = 2;
+
         /// <summary>
         /// Parses a plaintext DTA given its bytes in a byte array. If an encoding tag is set, tries to use the correct encoding.
         /// </summary>
@@ -522,7 +525,8 @@ namespace DtxCS
                         else if (version == 1)
                         {
                             dtb.WriteInt16LE((short)((DataArray)dta.Children[i]).Count); //rootNodes
-                            dtb.WriteInt32LE(1); //unknown
+                            dtb.WriteInt32LE(childrenWithIds); // node id
+                            childrenWithIds = childrenWithIds + 1;
                         }
                         write_children((DataArray)(dta.Children[i]), dtb, ((DataArray)dta.Children[i]).Count, version);
                         break;
