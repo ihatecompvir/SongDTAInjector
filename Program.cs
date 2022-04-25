@@ -47,7 +47,7 @@ namespace SongDTAInjector
 
             if (!File.Exists(args[0]))
             {
-                Console.WriteLine($"DTA file {args[1]} does not exist!");
+                Console.WriteLine($"DTA file {args[0]} does not exist!");
                 return;
             }
 
